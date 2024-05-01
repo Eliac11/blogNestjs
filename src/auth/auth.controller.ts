@@ -14,7 +14,7 @@ export class AuthController {
     signIn(@Body() signInDto: dtoSingIn) {
         return this.authService.signIn(signInDto.username, signInDto.password);
     }
-    
+    @ApiTags("Auth")
     @UseGuards(AuthGuard)
     @Get("me")
     @ApiBearerAuth()

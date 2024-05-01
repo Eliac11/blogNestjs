@@ -8,11 +8,13 @@ import { dtoUser } from 'src/dto/user.dto';
 export class UsersController {
     constructor(private readonly userService: UsersService) { }
 
+
+    @ApiTags("Users")
     @Get("")
     getUsers() {
         return this.userService.getUsers()
     }
-
+    @ApiTags("Users")
     @Get("/:username")
     getUser(@Param("username") username: string) {
         return this.userService.findOne(username)
