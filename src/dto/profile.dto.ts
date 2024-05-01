@@ -7,4 +7,7 @@ export class dtoProfile {
 
         @ApiProperty({required: false})
         avatar: string;
+
+        @ApiProperty()
+        userId: number;
 }

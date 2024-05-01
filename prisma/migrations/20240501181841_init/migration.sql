@@ -3,7 +3,10 @@ CREATE TABLE "User" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "username" TEXT NOT NULL,
     "email" TEXT NOT NULL,
-    "password" TEXT NOT NULL
+    "password" TEXT NOT NULL,
+    "role" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "User_id_fkey" FOREIGN KEY ("id") REFERENCES "Profile" ("userId") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -11,8 +14,7 @@ CREATE TABLE "Profile" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "userId" INTEGER NOT NULL,
     "bio" TEXT,
-    "avatar" TEXT,
-    CONSTRAINT "Profile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    "avatar" TEXT
 );
 
 -- CreateTable
@@ -36,6 +38,7 @@ CREATE TABLE "Post" (
     "upvotes" INTEGER NOT NULL DEFAULT 0,
     "downvotes" INTEGER NOT NULL DEFAULT 0,
     "views" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "Post_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
@@ -44,6 +47,15 @@ CREATE TABLE "PostView" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "postId" INTEGER NOT NULL,
     "userId" INTEGER NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CreateTable
+CREATE TABLE "PostReaction" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "postId" INTEGER NOT NULL,
+    "userId" INTEGER NOT NULL,
+    "reaction" INTEGER NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -80,6 +92,9 @@ CREATE UNIQUE INDEX "Tag_name_key" ON "Tag"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "PostView_postId_userId_key" ON "PostView"("postId", "userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "PostReaction_postId_userId_key" ON "PostReaction"("postId", "userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "_CategoryToPost_AB_unique" ON "_CategoryToPost"("A", "B");
