@@ -37,7 +37,7 @@ export class UsersService {
             throw new HttpException('Profile is exists', 422);
         }
         const new_profile = this.databaseService.profile.create({
-            data: {bio: "", userId: userId}
+            data: {bio: "", userId: userId, avatar: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973461_1280.png"}
         });
 
         return new_profile
@@ -76,5 +76,4 @@ export class UsersService {
         return new_user
 
     }
-
 }
