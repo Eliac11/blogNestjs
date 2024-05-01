@@ -1,8 +1,9 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Request, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { dtoSingIn } from 'src/dto/singin.dto';
 import { AuthGuard } from './auth.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { dtoUser } from 'src/dto/user.dto';
 
 @ApiBearerAuth()
 @Controller('auth')
@@ -14,6 +15,16 @@ export class AuthController {
     signIn(@Body() signInDto: dtoSingIn) {
         return this.authService.signIn(signInDto.username, signInDto.password);
     }
+
+    @ApiTags("Auth")
+    @UsePipes(new ValidationPipe())
+    @Post("singup")
+    createuser(@Body() dto: dtoUser) {
+        console.log("POST");
+        const res = this.authService.singup(dto)
+        return res
+    }
+
     @ApiTags("Auth")
     @UseGuards(AuthGuard)
     @Get("me")
@@ -21,4 +32,6 @@ export class AuthController {
     getprofile(@Request() req) {
         return req.user;
     }
+
+
 }

@@ -1,11 +1,13 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { AuthService } from 'src/auth/auth.service';
 import { DatabaseService } from 'src/database/database.service';
-import { dtoProfile } from 'src/dto/profile.dto';
 import { dtoUser } from 'src/dto/user.dto';
+
 
 @Injectable()
 export class UsersService {
     constructor(private readonly databaseService: DatabaseService) { }
+
 
     async findOne(username: string) {
         const res = await this.databaseService.user.findFirst(
@@ -41,14 +43,6 @@ export class UsersService {
         });
 
         return new_profile
-    }
-
-    async registrationNewUser(dto: dtoUser){
-        const user = await this.createUser(dto)
-
-        this.createEmptyProfile(user.id)
-        
-        return user
     }
 
     async createUser(dto: dtoUser) {
