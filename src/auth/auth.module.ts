@@ -13,7 +13,6 @@ import { UsersService } from 'src/users/users.service';
     JwtModule.register({
       global: true,
       secret: jwtSecret,
-      signOptions: { expiresIn: '60s' },
     })],
   providers: [AuthService, UsersService],
   controllers: [AuthController]
