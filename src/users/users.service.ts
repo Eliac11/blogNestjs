@@ -64,7 +64,11 @@ export class UsersService {
         }
 
         const new_user = this.databaseService.user.create({
-            data: dto
+            data: dto,
+            select:{
+                username:true,
+                id:true
+            }
         });
 
         return new_user

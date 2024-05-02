@@ -17,9 +17,8 @@ export class AuthController {
     }
 
     @ApiTags("Auth")
-    @UsePipes(new ValidationPipe())
     @Post("singup")
-    createuser(@Body() dto: dtoUser) {
+    singUp(@Body() dto: dtoUser) {
         console.log("POST");
         const res = this.authService.singup(dto)
         return res

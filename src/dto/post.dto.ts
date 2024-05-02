@@ -12,11 +12,11 @@ export class dtoPost {
     @IsString()
     content: string;
 
-    @ApiProperty({ required: false })
+    @ApiProperty({ required: false, default:[]})
     @IsArray()
-    categories: Array<dtoCategory>;
+    categories: Array<string>;
 
-    @ApiProperty({ required: false })
+    @ApiProperty({ required: false, default:[]})
     @IsArray()
-    tags: Array<dtoTag>;
+    tags: Array<string>;
 }
