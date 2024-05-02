@@ -1,7 +1,7 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpException, Param, ParseIntPipe, Patch, Post, Request, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpException, Param, ParseIntPipe, Patch, Post, Query, Request, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { dtoPost } from 'src/dto/post.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { dtoCategory } from 'src/dto/category.dto';
 import { dtoTag } from 'src/dto/tag.dto';
@@ -97,7 +97,7 @@ export class PostsController {
     @UsePipes(new ValidationPipe())
     @ApiBearerAuth()
     @Post("post/:id/voite")
-    async addVoitePost(@Param("id", ParseIntPipe) id: number, @Body() dto: dtoReaction,  @Request() req) {
+    async addVoitePost(@Param("id", ParseIntPipe) id: number, @Body() dto: dtoReaction, @Request() req) {
 
         return this.postService.addReactionPost(id, req.user, dto)
     }
@@ -116,9 +116,41 @@ export class PostsController {
     @UsePipes(new ValidationPipe())
     @ApiBearerAuth()
     @Patch("post/:id")
-    async updateOnePost(@Param("id", ParseIntPipe) id: number, @Body() dto: dtoPost, @Request() req) {
+    async updateOnePost(
+        @Param("id", ParseIntPipe) id: number, 
+        @Body() dto: dtoPost, 
+        @Request() req
+    ) {
 
         return this.postService.updatePost(id, dto, req.user)
+    }
+
+    
+    @ApiTags("Find")
+    @ApiQuery({ name: 'title', required: false })
+    @ApiQuery({ name: 'category', required: false, isArray: true })
+    @ApiQuery({ name: 'tags', required: false, isArray: true })
+    @ApiQuery({ name: 'authorId', required: false })
+    @ApiQuery({ name: 'sortBy', required: false, enum: ['newest', 'upvotes'] })
+    @Get("find")
+    async findPosts(
+        @Query('title') title?: string,
+        @Query('category') category?: string[],
+        @Query('tags') tags?: string[],
+        @Query('authorId') authorId?: number,
+        @Query('sortBy') sortBy?: 'newest' | 'upvotes',
+    ) {
+
+
+        if (typeof category === 'string') {
+            category = [category];
+        }
+
+        if (typeof tags === 'string') {
+            tags = [tags];
+        }
+
+        return this.postService.findPosts(title, category, tags, authorId, sortBy);
     }
 
 }

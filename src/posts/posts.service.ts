@@ -218,4 +218,64 @@ export class PostsService {
 
         return true
     }
+
+
+
+
+    async findPosts(
+        title?: string,
+        category?: string[],
+        tags?: string[],
+        authorId?: number,
+        sortBy?: 'newest' | 'upvotes',
+      ){
+        const where: any = {};
+    
+        if (title) {
+          where.title = {
+            contains: title,
+          };
+        }
+    
+        if (authorId) {
+          where.authorId = authorId;
+        }
+    
+        if (category && category.length > 0) {
+          where.categories = {
+            some: {
+              name: {
+                in: category,
+              },
+            },
+          };
+        }
+    
+        if (tags && tags.length > 0) {
+          where.tags = {
+            some: {
+              name: {
+                in: tags,
+              },
+            },
+          };
+        }
+    
+        const orderBy: any = sortBy === 'newest' ? { createdAt: 'desc' } : { upvotes: 'desc' };
+    
+        const posts = await this.databaseService.post.findMany({
+          where,
+          orderBy,
+          include: {
+            author: {select:{
+                username:true,
+                id:true
+            }},
+            categories: true,
+            tags: true,
+          },
+        });
+        
+        return posts;
+      }
 }
