@@ -116,7 +116,7 @@ export class PostsService {
     async updatePost(postid: number, dto: dtoPost, user: any){
 
 
-        this.chekKeeperPost(postid, user)
+        await this.chekKeeperPost(postid, user)
 
         const { tags, categories, ...postData } = dto
 
@@ -148,7 +148,7 @@ export class PostsService {
 
     async delOnePost(postid: number, user: any){
 
-        this.chekKeeperPost(postid, user)
+        await this.chekKeeperPost(postid, user)
         
         return this.databaseService.post.delete({where:{id: postid} })
     }
