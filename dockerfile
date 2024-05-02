@@ -1,11 +1,6 @@
-FROM node:20.10 as builder
-WORKDIR /
-
-FROM builder
-WORKDIR /app
-COPY ./package.json ./yarn.lock* ./
-RUN yarn install
+FROM node:20.10
 COPY . .
+RUN yarn install
 RUN yarn build
 
 CMD yarn start
