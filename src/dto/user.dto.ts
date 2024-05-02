@@ -19,7 +19,7 @@ export class dtoUser {
     @IsString()
     password: string;
     
-    @ApiProperty()
-    @IsString()
-    role: string
+    // @ApiProperty()
+    // @IsString()
+    // role: string
 }
