@@ -10,7 +10,6 @@ export class AuthService {
 
 
     async hashPassword(password: string) {
-        console.log(await bcrypt.hash(password, 2))
         return await bcrypt.hash(password, 2)
 
     }

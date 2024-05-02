@@ -19,7 +19,6 @@ export class AuthController {
     @ApiTags("Auth")
     @Post("singup")
     singUp(@Body() dto: dtoUser) {
-        console.log("POST");
         const res = this.authService.singup(dto)
         return res
     }
