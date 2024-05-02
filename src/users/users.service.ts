@@ -15,31 +15,31 @@ export class UsersService {
                 where: {
                     username: username
                 },
-                include:{
+                include: {
                     profile: true
                 }
             }
         );
         if (res == null) throw new HttpException("Not Found", 404)
         return res
-
-
     }
+
 
     async getUsers() {
-        return this.databaseService.user.findMany({include:{profile:true}});
+        return this.databaseService.user.findMany({ include: { profile: true } });
     }
 
-    async createEmptyProfile(userId: number){
+
+    async createEmptyProfile(userId: number) {
         let existingProfile = await this.databaseService.profile.findFirst({
-            where: { userId: userId}
+            where: { userId: userId }
         });
         if (existingProfile !== null) {
 
             throw new HttpException('Profile is exists', 422);
         }
         const new_profile = this.databaseService.profile.create({
-            data: {bio: "", userId: userId, avatar: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973461_1280.png"}
+            data: { bio: "", userId: userId, avatar: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973461_1280.png" }
         });
 
         return new_profile
@@ -65,9 +65,9 @@ export class UsersService {
 
         const new_user = this.databaseService.user.create({
             data: dto,
-            select:{
-                username:true,
-                id:true
+            select: {
+                username: true,
+                id: true
             }
         });
 
@@ -75,23 +75,26 @@ export class UsersService {
 
     }
 
-    async getUserPosts(username: string){
-
+    async getUserPosts(username: string) {
         const userposts = await this.databaseService.user.findFirst({
-            where: {username},
-            select:{
-                posts:{
+            where: { username },
+            select: {
+                posts: {
                     include: {
-                        author:{
-                            select:{
-                                username:true,
-                                id:true
-                            }}}}}
+                        author: {
+                            select: {
+                                username: true,
+                                id: true
+                            }
+                        }
+                    }
+                }
+            }
         })
 
         if (userposts == null) throw new HttpException("Not Found", 404)
-        
-
         return userposts.posts
     }
+
+    
 }

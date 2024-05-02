@@ -6,6 +6,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { dtoCategory } from 'src/dto/category.dto';
 import { dtoTag } from 'src/dto/tag.dto';
 import { DatabaseService } from 'src/database/database.service';
+import { dtoReaction } from 'src/dto/reaction.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -85,6 +86,25 @@ export class PostsController {
     @ApiTags("Posts")
     @UseGuards(AuthGuard)
     @ApiBearerAuth()
+    @Post("post/:id/view")
+    async addViewPost(@Param("id", ParseIntPipe) id: number, @Request() req) {
+
+        return this.postService.addViewPost(id, req.user)
+    }
+
+    @ApiTags("Posts")
+    @UseGuards(AuthGuard)
+    @UsePipes(new ValidationPipe())
+    @ApiBearerAuth()
+    @Post("post/:id/voite")
+    async addVoitePost(@Param("id", ParseIntPipe) id: number, @Body() dto: dtoReaction,  @Request() req) {
+
+        return this.postService.addReactionPost(id, req.user, dto)
+    }
+
+    @ApiTags("Posts")
+    @UseGuards(AuthGuard)
+    @ApiBearerAuth()
     @Delete("post/:id")
     async gelOnePost(@Param("id", ParseIntPipe) id: number, @Request() req) {
 
@@ -93,6 +113,7 @@ export class PostsController {
 
     @ApiTags("Posts")
     @UseGuards(AuthGuard)
+    @UsePipes(new ValidationPipe())
     @ApiBearerAuth()
     @Patch("post/:id")
     async updateOnePost(@Param("id", ParseIntPipe) id: number, @Body() dto: dtoPost, @Request() req) {

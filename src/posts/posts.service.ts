@@ -3,6 +3,7 @@ import { Category, Prisma, Tag, User } from '@prisma/client';
 import { DatabaseService } from 'src/database/database.service';
 import { dtoCategory } from 'src/dto/category.dto';
 import { dtoPost } from 'src/dto/post.dto';
+import { dtoReaction } from 'src/dto/reaction.dto';
 import { dtoTag } from 'src/dto/tag.dto';
 import { UsersService } from 'src/users/users.service';
 
@@ -150,6 +151,58 @@ export class PostsService {
         this.chekKeeperPost(postid, user)
         
         return this.databaseService.post.delete({where:{id: postid} })
+    }
+
+    async addViewPost(postid: number, user: any){
+        const existingPost = await this.databaseService.post.findFirst({ where: { id: postid } })
+
+        if (existingPost == null){
+            throw new HttpException("Post Not Found", 404)
+        }
+
+        const existingView = await this.databaseService.postView.findFirst({ where: { postId:postid, userId: user.sub } })
+
+        if (existingView){
+            throw new HttpException("Viewed", 422)
+        }
+
+        const view = await this.databaseService.postView.create({data:{
+            postId:postid,
+            userId:user.sub
+        }})
+
+        await this.databaseService.post.update({where: {id: postid}, data:{views:existingPost.views + 1}})
+
+        return view
+
+    }
+
+    async addReactionPost(postid: number, user: any, dtoReaction: dtoReaction){
+        const existingPost = await this.databaseService.post.findFirst({ where: { id: postid } })
+
+        if (existingPost == null){
+            throw new HttpException("Post Not Found", 404)
+        }
+
+        const existingReaction = await this.databaseService.postReaction.findFirst({ where: { postId:postid, userId: user.sub } })
+
+        if (existingReaction){
+            throw new HttpException("Reaction found", 422)
+        }
+
+        const newVote = await this.databaseService.postReaction.create({data:{
+            postId: postid,
+            userId: user.sub,
+            ...dtoReaction
+        }})
+
+        if( newVote.reaction == -1){
+            await this.databaseService.post.update({where: {id: postid}, data:{downvotes: existingPost.downvotes + 1}})
+        }    
+        else{
+            await this.databaseService.post.update({where: {id: postid}, data:{upvotes: existingPost.upvotes + 1}})
+        }
+        return newVote
     }
 
     private async chekKeeperPost(postid: number, user: any ){
