@@ -24,9 +24,40 @@ export class UsersService {
         return res
     }
 
+    async getOneUser(username: string) {
+        const res = await this.databaseService.user.findFirst(
+            {
+                where: {
+                    username: username
+                },
+                select: {
+                    id: true,
+                    username: true,
+                    profile: true,
+                    role: true,
+                    createdAt: true
+                }
+            }
+        );
+        if (res == null) throw new HttpException("Not Found", 404)
+        return res
+    }
+
+
+
 
     async getUsers() {
-        return this.databaseService.user.findMany({ include: { profile: true } });
+        return this.databaseService.user.findMany(
+            {
+                select: {
+                    id: true,
+                    username: true,
+                    profile: true,
+                    role: true,
+                    createdAt: true
+                }
+            }
+        );
     }
 
 
@@ -96,5 +127,5 @@ export class UsersService {
         return userposts.posts
     }
 
-    
+
 }

@@ -5,18 +5,20 @@ import { AuthGuard } from './auth.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { dtoUser } from 'src/dto/user.dto';
 
-@ApiBearerAuth()
+
 @Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService) { }
 
     @ApiTags("Auth")
+    @UsePipes(new ValidationPipe({whitelist:true}))
     @Post('singin')
-    signIn(@Body() signInDto: dtoSingIn) {
-        return this.authService.signIn(signInDto.username, signInDto.password);
+    signIn(@Body() dto: dtoSingIn) {
+        return this.authService.signIn(dto.username, dto.password);
     }
 
     @ApiTags("Auth")
+    @UsePipes(new ValidationPipe({whitelist:true}))
     @Post("singup")
     singUp(@Body() dto: dtoUser) {
         const res = this.authService.singup(dto)

@@ -17,7 +17,7 @@ export class UsersController {
     @ApiTags("Users")
     @Get("/:username")
     async getUser(@Param("username") username: string) {
-        return this.userService.findOne(username)
+        return this.userService.getOneUser(username)
     }
 
     @ApiTags("Users")
