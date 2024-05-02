@@ -10,13 +10,19 @@ export class UsersController {
 
     @ApiTags("Users")
     @Get("")
-    getUsers() {
+    async getUsers() {
         return this.userService.getUsers()
     }
 
     @ApiTags("Users")
     @Get("/:username")
-    getUser(@Param("username") username: string) {
+    async getUser(@Param("username") username: string) {
         return this.userService.findOne(username)
+    }
+
+    @ApiTags("Users")
+    @Get("/:username/posts")
+    async getUserPosts(@Param("username") username: string) {
+        return await this.userService.getUserPosts(username)
     }
 }

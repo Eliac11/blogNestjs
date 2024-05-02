@@ -74,4 +74,24 @@ export class UsersService {
         return new_user
 
     }
+
+    async getUserPosts(username: string){
+
+        const userposts = await this.databaseService.user.findFirst({
+            where: {username},
+            select:{
+                posts:{
+                    include: {
+                        author:{
+                            select:{
+                                username:true,
+                                id:true
+                            }}}}}
+        })
+
+        if (userposts == null) throw new HttpException("Not Found", 404)
+        
+
+        return userposts.posts
+    }
 }

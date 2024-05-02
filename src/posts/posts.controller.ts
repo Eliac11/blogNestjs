@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpException, Param, ParseIntPipe, Post, Request, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpException, Param, ParseIntPipe, Patch, Post, Request, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { dtoPost } from 'src/dto/post.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -17,7 +17,7 @@ export class PostsController {
     @Post("")
     @ApiBearerAuth()
     async create(@Body() dto: dtoPost, @Request() req) {
-        const res = this.postService.createPost(dto, req.user )
+        const res = this.postService.createPost(dto, req.user)
         return res
     }
 
@@ -35,7 +35,7 @@ export class PostsController {
     @ApiBearerAuth()
     async createcategiory(@Body() dto: dtoCategory, @Request() req) {
 
-        if (req.user.role !== "admin"){
+        if (req.user.role !== "admin") {
             throw new HttpException("Bad role", 403)
         }
         const res = this.postService.createCategory(dto)
@@ -57,7 +57,7 @@ export class PostsController {
     @ApiBearerAuth()
     async createtag(@Body() dto: dtoTag, @Request() req) {
 
-        if (req.user.role !== "admin"){
+        if (req.user.role !== "admin") {
             throw new HttpException("Bad role", 403)
         }
         const res = this.postService.createTag(dto)
@@ -74,9 +74,9 @@ export class PostsController {
 
     @ApiTags("Posts")
     @Get("post/:id")
-    async getOnePost(@Param("id", ParseIntPipe) id: number){
+    async getOnePost(@Param("id", ParseIntPipe) id: number) {
         const res = await this.postService.getOnePost(id)
-        if (res == null){
+        if (res == null) {
             throw new HttpException("Not Found", 404)
         }
         return res
@@ -86,8 +86,18 @@ export class PostsController {
     @UseGuards(AuthGuard)
     @ApiBearerAuth()
     @Delete("post/:id")
-    async gelOnePost(@Param("id", ParseIntPipe) id: number, @Request() req){
+    async gelOnePost(@Param("id", ParseIntPipe) id: number, @Request() req) {
 
         return this.postService.delOnePost(id, req.user)
     }
+
+    @ApiTags("Posts")
+    @UseGuards(AuthGuard)
+    @ApiBearerAuth()
+    @Patch("post/:id")
+    async updateOnePost(@Param("id", ParseIntPipe) id: number, @Body() dto: dtoPost, @Request() req) {
+
+        return this.postService.updatePost(id, dto, req.user)
+    }
+
 }
