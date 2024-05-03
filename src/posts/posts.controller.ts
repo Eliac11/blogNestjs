@@ -156,7 +156,7 @@ export class PostsController {
         @Query('title') title?: string,
         @Query('category') category?: string[],
         @Query('tags') tags?: string[],
-        @Query('authorId', ParseIntPipe) authorId?: number,
+        @Query('authorId') authorId?: number,
         @Query('sortBy') sortBy?: 'newest' | 'upvotes',
     ) {
 
@@ -168,6 +168,8 @@ export class PostsController {
         if (typeof tags === 'string') {
             tags = [tags]
         }
+
+        authorId = authorId ? parseInt(authorId.toString(), 10) : undefined
 
         return this.postService.findPosts(title, category, tags, authorId, sortBy)
     }
