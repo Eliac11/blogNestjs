@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Request, UseGuards, UsePipes, ValidationPi
 import { AuthService } from './auth.service';
 import { dtoSingIn } from 'src/dto/singin.dto';
 import { AuthGuard } from './auth.guard';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { dtoUser } from 'src/dto/user.dto';
 
 
@@ -10,13 +10,15 @@ import { dtoUser } from 'src/dto/user.dto';
 export class AuthController {
     constructor(private authService: AuthService) { }
 
+    @ApiOperation({description:"Singin"})
     @ApiTags("Auth")
     @UsePipes(new ValidationPipe({whitelist:true}))
     @Post('singin')
     signIn(@Body() dto: dtoSingIn) {
-        return this.authService.signIn(dto.username, dto.password);
+        return this.authService.signIn(dto.username, dto.password)
     }
 
+    @ApiOperation({description:"Singup"})
     @ApiTags("Auth")
     @UsePipes(new ValidationPipe({whitelist:true}))
     @Post("singup")
@@ -25,12 +27,13 @@ export class AuthController {
         return res
     }
 
+    
     @ApiTags("Auth")
     @UseGuards(AuthGuard)
     @Get("me")
     @ApiBearerAuth()
     getprofile(@Request() req) {
-        return req.user;
+        return req.user
     }
 
 

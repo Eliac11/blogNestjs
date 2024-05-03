@@ -5,14 +5,14 @@ import { PrismaClient } from '@prisma/client';
 export class DatabaseService extends PrismaClient {
 
     async onModuleInit(){
-        await this.$connect();
+        await this.$connect()
     }
 
     async onModuleDestroy(){
-        await this.$disconnect();
+        await this.$disconnect()
     }
 
     async enableShutdownHooks(app: INestApplication){
-        app.enableShutdownHooks();
+        app.enableShutdownHooks()
     }
 }

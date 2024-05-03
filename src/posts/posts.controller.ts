@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpException, Param, ParseIntPipe, Patch, Post, Query, Request, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { dtoPost } from 'src/dto/post.dto';
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { dtoCategory } from 'src/dto/category.dto';
 import { dtoTag } from 'src/dto/tag.dto';
@@ -12,6 +12,7 @@ import { dtoReaction } from 'src/dto/reaction.dto';
 export class PostsController {
     constructor(private readonly postService: PostsService) { }
 
+    @ApiOperation({description:"Create new post"})
     @ApiTags("Posts")
     @UsePipes(new ValidationPipe())
     @UseGuards(AuthGuard)
@@ -22,6 +23,7 @@ export class PostsController {
         return res
     }
 
+    @ApiOperation({description:"Get all posts"})
     @ApiTags("Posts")
     @Get("")
     async getAll() {
@@ -29,6 +31,7 @@ export class PostsController {
         return res
     }
 
+    @ApiOperation({description:"Create category"})
     @ApiTags("Posts")
     @UsePipes(new ValidationPipe())
     @UseGuards(AuthGuard)
@@ -43,6 +46,7 @@ export class PostsController {
         return res
     }
 
+    @ApiOperation({description:"Get All Categories"})
     @ApiTags("Posts")
     @UsePipes(new ValidationPipe())
     @Get("categories")
@@ -51,6 +55,7 @@ export class PostsController {
         return this.postService.getAllCategorys()
     }
 
+    @ApiOperation({description:"Create tag"})
     @ApiTags("Posts")
     @UsePipes(new ValidationPipe())
     @UseGuards(AuthGuard)
@@ -65,6 +70,7 @@ export class PostsController {
         return res
     }
 
+    @ApiOperation({description:"Get All Tags"})
     @ApiTags("Posts")
     @UsePipes(new ValidationPipe())
     @Get("tags")
@@ -73,6 +79,7 @@ export class PostsController {
         return this.postService.getAllTags()
     }
 
+    @ApiOperation({description:"Get One Post"})
     @ApiTags("Posts")
     @Get("post/:id")
     async getOnePost(@Param("id", ParseIntPipe) id: number) {
@@ -83,6 +90,7 @@ export class PostsController {
         return res
     }
 
+    @ApiOperation({description:"Add view post"})
     @ApiTags("Posts")
     @UseGuards(AuthGuard)
     @ApiBearerAuth()
@@ -92,6 +100,7 @@ export class PostsController {
         return this.postService.addViewPost(id, req.user)
     }
 
+    @ApiOperation({description:"Set Voite Post"})
     @ApiTags("Posts")
     @UseGuards(AuthGuard)
     @UsePipes(new ValidationPipe())
@@ -102,6 +111,7 @@ export class PostsController {
         return this.postService.addReactionPost(id, req.user, dto)
     }
 
+    @ApiOperation({description:"Del Post"})
     @ApiTags("Posts")
     @UseGuards(AuthGuard)
     @ApiBearerAuth()
@@ -111,6 +121,7 @@ export class PostsController {
         return this.postService.delOnePost(id, req.user)
     }
 
+    @ApiOperation({description:"Update Post"})
     @ApiTags("Posts")
     @UseGuards(AuthGuard)
     @UsePipes(new ValidationPipe())
@@ -125,7 +136,7 @@ export class PostsController {
         return this.postService.updatePost(id, dto, req.user)
     }
 
-    
+    @ApiOperation({description:"Find post"})
     @ApiTags("Find")
     @ApiQuery({ name: 'title', required: false })
     @ApiQuery({ name: 'category', required: false, isArray: true })
@@ -143,14 +154,14 @@ export class PostsController {
 
 
         if (typeof category === 'string') {
-            category = [category];
+            category = [category]
         }
 
         if (typeof tags === 'string') {
-            tags = [tags];
+            tags = [tags]
         }
 
-        return this.postService.findPosts(title, category, tags, authorId, sortBy);
+        return this.postService.findPosts(title, category, tags, authorId, sortBy)
     }
 
 }

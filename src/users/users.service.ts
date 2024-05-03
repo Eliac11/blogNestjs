@@ -1,5 +1,4 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { AuthService } from 'src/auth/auth.service';
 import { DatabaseService } from 'src/database/database.service';
 import { dtoUser } from 'src/dto/user.dto';
 
@@ -19,7 +18,7 @@ export class UsersService {
                     profile: true
                 }
             }
-        );
+        )
         if (res == null) throw new HttpException("Not Found", 404)
         return res
     }
@@ -38,7 +37,7 @@ export class UsersService {
                     createdAt: true
                 }
             }
-        );
+        )
         if (res == null) throw new HttpException("Not Found", 404)
         return res
     }
@@ -57,21 +56,21 @@ export class UsersService {
                     createdAt: true
                 }
             }
-        );
+        )
     }
 
 
     async createEmptyProfile(userId: number) {
         let existingProfile = await this.databaseService.profile.findFirst({
             where: { userId: userId }
-        });
+        })
         if (existingProfile !== null) {
 
-            throw new HttpException('Profile is exists', 422);
+            throw new HttpException('Profile is exists', 422)
         }
         const new_profile = this.databaseService.profile.create({
             data: { bio: "", userId: userId, avatar: "https://t4.ftcdn.net/jpg/00/23/72/59/360_F_23725944_W2aSrg3Kqw3lOmU4IAn7iXV88Rnnfch1.jpg" }
-        });
+        })
 
         return new_profile
     }
@@ -80,18 +79,18 @@ export class UsersService {
 
         let existingUser = await this.databaseService.user.findFirst({
             where: { email: dto.email }
-        });
+        })
         if (existingUser !== null) {
 
-            throw new HttpException('User with this email already exists', 422);
+            throw new HttpException('User with this email already exists', 422)
         }
 
         existingUser = await this.databaseService.user.findFirst({
             where: { username: dto.username }
-        });
+        })
 
         if (existingUser) {
-            throw new HttpException('User with this username already exists', 422);
+            throw new HttpException('User with this username already exists', 422)
         }
 
         const new_user = this.databaseService.user.create({
@@ -100,7 +99,7 @@ export class UsersService {
                 username: true,
                 id: true
             }
-        });
+        })
 
         return new_user
 

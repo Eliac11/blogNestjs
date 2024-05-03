@@ -108,7 +108,7 @@ export class PostsService {
                 tags: true,
                 categories:true
             }
-        });
+        })
 
         return post
     }
@@ -136,7 +136,7 @@ export class PostsService {
                     disconnect: await this.getAllCategorys(),
                     connect: existingCategories.map(category => ({ id: category.id })) },
             }
-            });
+            })
     }
 
     async getOnePost(postid: number){
@@ -229,16 +229,16 @@ export class PostsService {
         authorId?: number,
         sortBy?: 'newest' | 'upvotes',
       ){
-        const where: any = {};
+        const where: any = {}
     
         if (title) {
           where.title = {
             contains: title,
-          };
+          }
         }
     
         if (authorId) {
-          where.authorId = authorId;
+          where.authorId = authorId
         }
     
         if (category && category.length > 0) {
@@ -248,7 +248,7 @@ export class PostsService {
                 in: category,
               },
             },
-          };
+          }
         }
     
         if (tags && tags.length > 0) {
@@ -258,10 +258,10 @@ export class PostsService {
                 in: tags,
               },
             },
-          };
+          }
         }
     
-        const orderBy: any = sortBy === 'newest' ? { createdAt: 'desc' } : { upvotes: 'desc' };
+        const orderBy: any = sortBy === 'newest' ? { createdAt: 'desc' } : { upvotes: 'desc' }
     
         const posts = await this.databaseService.post.findMany({
           where,
@@ -274,8 +274,8 @@ export class PostsService {
             categories: true,
             tags: true,
           },
-        });
+        })
         
-        return posts;
+        return posts
       }
 }
