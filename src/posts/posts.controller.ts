@@ -24,11 +24,19 @@ export class PostsController {
     }
 
     @ApiOperation({description:"Get all posts"})
+    @ApiQuery({ name: 'pagenum', required: false })
+    @ApiQuery({ name: 'pagesize', required: false })
     @ApiTags("Posts")
     @Get("")
-    async getAll() {
-        const res = this.postService.getAllPosts()
-        return res
+    async getAll(
+        @Query("pagenum") pagenum?: number,
+        @Query("pagesize") pagesize?: number
+    ) {
+
+        pagenum = pagenum ? parseInt(pagenum.toString(), 10) : 1
+        pagesize = pagesize ? parseInt(pagesize.toString(), 10) : 10
+
+        return await this.postService.getAllPosts(pagenum, pagesize)
     }
 
     @ApiOperation({description:"Create category"})
@@ -148,7 +156,7 @@ export class PostsController {
         @Query('title') title?: string,
         @Query('category') category?: string[],
         @Query('tags') tags?: string[],
-        @Query('authorId') authorId?: number,
+        @Query('authorId', ParseIntPipe) authorId?: number,
         @Query('sortBy') sortBy?: 'newest' | 'upvotes',
     ) {
 

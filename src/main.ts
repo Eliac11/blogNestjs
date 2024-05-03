@@ -8,14 +8,12 @@ async function bootstrap() {
 
 
   const config = new DocumentBuilder().setTitle('API description')
-    .setVersion('1.0').addBearerAuth()
+    .setVersion('1.0')
+    .addBearerAuth()
     .build()
   const document = SwaggerModule.createDocument(app, config)
   SwaggerModule.setup('docs', app, document)
 
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true
-  }))
   await app.listen(3000)
 }
 bootstrap()

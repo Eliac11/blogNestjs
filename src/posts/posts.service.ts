@@ -15,16 +15,31 @@ export class PostsService {
     ) { }
 
 
-    async getAllPosts() {
-        return this.databaseService.post.findMany({include:{
-            tags: true,
-            categories:true,
-            author:{
-                select:{
-                    username:true
+    async getAllPosts(pagenum: number, pagesize: number) {
+
+        const skip = (pagenum - 1) * pagesize
+        const totalCount = await this.databaseService.user.count()
+
+        const posts = await this.databaseService.post.findMany({
+            skip: skip,
+            take: pagesize,
+            include: {
+                tags: true,
+                categories: true,
+                author: {
+                    select: {
+                        username: true
+                    }
                 }
             }
-        }})
+        })
+
+        return {
+            data: posts,
+            pageNum: pagenum,
+            pageSize: posts.length,
+            totalCount: totalCount
+        }
     }
 
     async createCategory(dto: dtoCategory) {
@@ -33,7 +48,7 @@ export class PostsService {
             throw new HttpException(`Categotie ${dto.name} exist`, 422)
         }
 
-        return this.databaseService.category.create({data: dto})
+        return this.databaseService.category.create({ data: dto })
     }
 
     async getAllCategorys() {
@@ -46,14 +61,14 @@ export class PostsService {
             throw new HttpException(`Tag ${dto.name} exist`, 422)
         }
 
-        return this.databaseService.tag.create({data: dto})
+        return this.databaseService.tag.create({ data: dto })
     }
 
     async getAllTags() {
         return this.databaseService.tag.findMany()
     }
 
-    private async getValidateTags(tags: string[]){
+    private async getValidateTags(tags: string[]) {
 
         const existingTags: Tag[] = []
 
@@ -68,12 +83,12 @@ export class PostsService {
         return existingTags
     }
 
-    private async getValidateCategories(categories: string[]){
+    private async getValidateCategories(categories: string[]) {
 
         const existingCategories: Category[] = []
 
         for (const category of categories) {
-            const existingCategory = await this.databaseService.category.findFirst({ where: { name: category }})
+            const existingCategory = await this.databaseService.category.findFirst({ where: { name: category } })
             if (existingCategory) {
                 existingCategories.push(existingCategory)
             } else {
@@ -97,23 +112,25 @@ export class PostsService {
                 tags: { connect: existingTags.map(tag => ({ id: tag.id })) },
                 categories: { connect: existingCategories.map(category => ({ id: category.id })) },
                 author: {
-                    connect: await this.userService.findOne(user.username)
+                    connect: await this.userService.findOneForAuth(user.username)
                 }
             },
             include: {
-                author: {select:{
-                    id:true,
-                    username:true
-                }},
+                author: {
+                    select: {
+                        id: true,
+                        username: true
+                    }
+                },
                 tags: true,
-                categories:true
+                categories: true
             }
         })
 
         return post
     }
 
-    async updatePost(postid: number, dto: dtoPost, user: any){
+    async updatePost(postid: number, dto: dtoPost, user: any) {
 
 
         await this.chekKeeperPost(postid, user)
@@ -123,96 +140,102 @@ export class PostsService {
         const existingTags: Tag[] = await this.getValidateTags(tags)
         const existingCategories: Category[] = await this.getValidateCategories(categories)
 
-        
+
         return this.databaseService.post.update({
-              where: { id: postid },
-              include:{tags:true, categories: true},
-              data:{
+            where: { id: postid },
+            include: { tags: true, categories: true },
+            data: {
                 ...postData,
-                tags: { 
-                    disconnect: await this.getAllTags(), 
-                    connect: existingTags.map(tag => ({ id: tag.id })) },
+                tags: {
+                    disconnect: await this.getAllTags(),
+                    connect: existingTags.map(tag => ({ id: tag.id }))
+                },
                 categories: {
                     disconnect: await this.getAllCategorys(),
-                    connect: existingCategories.map(category => ({ id: category.id })) },
+                    connect: existingCategories.map(category => ({ id: category.id }))
+                },
             }
-            })
-    }
-
-    async getOnePost(postid: number){
-        return await this.databaseService.post.findFirst({ 
-            where: {id: postid}, 
-            include: {tags: true, categories: true}
         })
     }
 
-    async delOnePost(postid: number, user: any){
-
-        await this.chekKeeperPost(postid, user)
-        
-        return this.databaseService.post.delete({where:{id: postid} })
+    async getOnePost(postid: number) {
+        return await this.databaseService.post.findFirst({
+            where: { id: postid },
+            include: { tags: true, categories: true }
+        })
     }
 
-    async addViewPost(postid: number, user: any){
+    async delOnePost(postid: number, user: any) {
+
+        await this.chekKeeperPost(postid, user)
+
+        return this.databaseService.post.delete({ where: { id: postid } })
+    }
+
+    async addViewPost(postid: number, user: any) {
         const existingPost = await this.databaseService.post.findFirst({ where: { id: postid } })
 
-        if (existingPost == null){
+        if (existingPost == null) {
             throw new HttpException("Post Not Found", 404)
         }
 
-        const existingView = await this.databaseService.postView.findFirst({ where: { postId:postid, userId: user.sub } })
+        const existingView = await this.databaseService.postView.findFirst({ where: { postId: postid, userId: user.sub } })
 
-        if (existingView){
+        if (existingView) {
             throw new HttpException("Viewed", 422)
         }
 
-        const view = await this.databaseService.postView.create({data:{
-            postId:postid,
-            userId:user.sub
-        }})
+        const view = await this.databaseService.postView.create({
+            data: {
+                postId: postid,
+                userId: user.sub
+            }
+        })
 
-        await this.databaseService.post.update({where: {id: postid}, data:{views:existingPost.views + 1}})
+        await this.databaseService.post.update({ where: { id: postid }, data: { views: existingPost.views + 1 } })
 
         return view
 
     }
 
-    async addReactionPost(postid: number, user: any, dtoReaction: dtoReaction){
+    async addReactionPost(postid: number, user: any, dtoReaction: dtoReaction) {
         const existingPost = await this.databaseService.post.findFirst({ where: { id: postid } })
 
-        if (existingPost == null){
+        if (existingPost == null) {
             throw new HttpException("Post Not Found", 404)
         }
 
-        const existingReaction = await this.databaseService.postReaction.findFirst({ where: { postId:postid, userId: user.sub } })
+        const existingReaction = await this.databaseService.postReaction.findFirst({ where: { postId: postid, userId: user.sub } })
 
-        if (existingReaction){
+        if (existingReaction) {
             throw new HttpException("Reaction found", 422)
         }
 
-        const newVote = await this.databaseService.postReaction.create({data:{
-            postId: postid,
-            userId: user.sub,
-            ...dtoReaction
-        }})
+        const newVote = await this.databaseService.postReaction.create({
+            data: {
+                postId: postid,
+                userId: user.sub,
+                ...dtoReaction
+            }
+        })
 
-        if( newVote.reaction == -1){
-            await this.databaseService.post.update({where: {id: postid}, data:{downvotes: existingPost.downvotes + 1}})
-        }    
-        else{
-            await this.databaseService.post.update({where: {id: postid}, data:{upvotes: existingPost.upvotes + 1}})
+        if (newVote.reaction == -1) {
+            await this.databaseService.post.update({ where: { id: postid }, data: { downvotes: existingPost.downvotes + 1 } })
+        }
+        else {
+            await this.databaseService.post.update({ where: { id: postid }, data: { upvotes: existingPost.upvotes + 1 } })
         }
         return newVote
     }
 
-    private async chekKeeperPost(postid: number, user: any ){
+    private async chekKeeperPost(postid: number, user: any) {
         const existingPost = await this.databaseService.post.findFirst({ where: { id: postid } })
 
-        if (existingPost == null){
+        if (existingPost == null) {
             throw new HttpException("Not Found", 404)
         }
 
-        if (existingPost.authorId != user.sub){
+        if (existingPost.authorId != user.sub) {
             throw new HttpException("Forbidden", 403)
         }
 
@@ -227,55 +250,57 @@ export class PostsService {
         category?: string[],
         tags?: string[],
         authorId?: number,
-        sortBy?: 'newest' | 'upvotes',
-      ){
+        sortBy?: 'newest' | 'upvotes'
+    ) {
         const where: any = {}
-    
+
         if (title) {
-          where.title = {
-            contains: title,
-          }
+            where.title = {
+                contains: title,
+            }
         }
-    
+
         if (authorId) {
-          where.authorId = authorId
+            where.authorId = authorId
         }
-    
+
         if (category && category.length > 0) {
-          where.categories = {
-            some: {
-              name: {
-                in: category,
-              },
-            },
-          }
+            where.categories = {
+                some: {
+                    name: {
+                        in: category,
+                    },
+                },
+            }
         }
-    
+
         if (tags && tags.length > 0) {
-          where.tags = {
-            some: {
-              name: {
-                in: tags,
-              },
-            },
-          }
+            where.tags = {
+                some: {
+                    name: {
+                        in: tags,
+                    },
+                },
+            }
         }
-    
+
         const orderBy: any = sortBy === 'newest' ? { createdAt: 'desc' } : { upvotes: 'desc' }
-    
+
         const posts = await this.databaseService.post.findMany({
-          where,
-          orderBy,
-          include: {
-            author: {select:{
-                username:true,
-                id:true
-            }},
-            categories: true,
-            tags: true,
-          },
+            where,
+            orderBy,
+            include: {
+                author: {
+                    select: {
+                        username: true,
+                        id: true
+                    }
+                },
+                categories: true,
+                tags: true,
+            },
         })
-        
+
         return posts
-      }
+    }
 }

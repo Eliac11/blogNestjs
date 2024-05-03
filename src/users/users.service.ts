@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { dtoUser } from 'src/dto/user.dto';
 
@@ -8,7 +8,7 @@ export class UsersService {
     constructor(private readonly databaseService: DatabaseService) { }
 
 
-    async findOne(username: string) {
+    async findOneForAuth(username: string) {
         const res = await this.databaseService.user.findFirst(
             {
                 where: {
@@ -19,7 +19,7 @@ export class UsersService {
                 }
             }
         )
-        if (res == null) throw new HttpException("Not Found", 404)
+        if (res == null) throw new UnauthorizedException()
         return res
     }
 
@@ -45,9 +45,16 @@ export class UsersService {
 
 
 
-    async getUsers() {
-        return this.databaseService.user.findMany(
+    async getUsers(pagenum: number, pagesize: number) {
+
+        const skip = (pagenum - 1) * pagesize
+        const totalCount = await this.databaseService.user.count()
+
+        
+        const users = await this.databaseService.user.findMany(
             {
+                skip: skip,
+                take: pagesize,
                 select: {
                     id: true,
                     username: true,
@@ -57,6 +64,13 @@ export class UsersService {
                 }
             }
         )
+
+        return {
+            data: users,
+            pageNum: pagenum,
+            pageSize: users.length,
+            totalCount: totalCount
+        }
     }
 
 
